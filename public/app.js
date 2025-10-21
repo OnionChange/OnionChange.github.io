@@ -1,4 +1,4 @@
-// Basic nav
+// Навигация и плавная прокрутка
 const navToggle = document.getElementById('navToggle');
 const menu = document.getElementById('menu');
 if (navToggle) {
@@ -9,22 +9,30 @@ if (navToggle) {
 }
 document.querySelectorAll('nav a').forEach(a => {
   a.addEventListener('click', e => {
-    if (a.hash) { e.preventDefault(); document.querySelector(a.hash)?.scrollIntoView({behavior:'smooth'}); if (getComputedStyle(navToggle).display !== 'none') menu.style.display='none'; }
+    if (!a.hash) return; // игнор внешних ссылок (Telegram)
+    e.preventDefault();
+    document.querySelector(a.hash)?.scrollIntoView({behavior:'smooth', block:'start'});
+    if (getComputedStyle(navToggle).display !== 'none') menu.style.display='none';
   });
 });
+
 document.getElementById('year').textContent = new Date().getFullYear();
 
-// Reviews
+// Отзывы с пагинацией
 const REVIEWS_PER_PAGE = 10;
 let reviews = [];
 let currentPage = 1;
-async function loadReviews(){
-  const res = await fetch('reviews.json?ts='+Date.now());
-  const data = await res.json();
-  reviews = data.sort((a,b)=> new Date(b.date) - new Date(a.date));
-  renderPage(1);
-  document.getElementById('reviewsInfo').textContent = `Всего отзывов: ${reviews.length}`;
+
+async function loadReviews() {
+  try {
+    const res = await fetch('reviews.json?ts=' + Date.now());
+    const data = await res.json();
+    reviews = data.sort((a,b)=> new Date(b.date) - new Date(a.date));
+    renderPage(1);
+    document.getElementById('reviewsInfo').textContent = `Всего отзывов: ${reviews.length}`;
+  } catch (e) { console.error(e); }
 }
+
 function renderPage(page){
   currentPage = page;
   const start = (page-1)*REVIEWS_PER_PAGE;
@@ -34,40 +42,38 @@ function renderPage(page){
     <article class="review">
       <div class="meta">Заявка: <span class="title">${escapeHtml(r.request_id)}</span> • Сумма: ${Number(r.amount_rub).toLocaleString('ru-RU')} ₽ • Дата: ${formatDate(r.date)} • Имя: ${escapeHtml(r.name)}</div>
       <p>${escapeHtml(r.text)}</p>
-    </article>`).join('');
+    </article>
+  `).join('');
   renderPager();
 }
+
 function renderPager(){
   const pages = Math.ceil(reviews.length / REVIEWS_PER_PAGE) || 1;
   const pager = document.getElementById('pager');
-  let html = `<button ${currentPage===1?'disabled':''} data-goto="${currentPage-1}">Назад</button>`;
-  for(let p=1;p<=pages;p++){ html += `<button class="${p===currentPage?'active':''}" data-goto="${p}">${p}</button>`; }
+  let html = '';
+  html += `<button ${currentPage===1?'disabled':''} data-goto="${currentPage-1}">Назад</button>`;
+  for (let p=1; p<=pages; p++){
+    html += `<button class="${p===currentPage?'active':''}" data-goto="${p}">${p}</button>`;
+  }
   html += `<button ${currentPage===pages?'disabled':''} data-goto="${currentPage+1}">Вперёд</button>`;
   pager.innerHTML = html;
-  pager.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>renderPage(Number(btn.dataset.goto))));
+  pager.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const goto = Number(btn.dataset.goto);
+      if (!Number.isNaN(goto)) renderPage(goto);
+    });
+  });
 }
-function formatDate(d){ try{ return new Date(d).toLocaleDateString('ru-RU'); }catch{ return d; } }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
-// Form
-const form = document.getElementById('reviewForm');
-const formStatus = document.getElementById('formStatus');
-const modal = document.getElementById('modal');
-const modalClose = document.getElementById('modalClose');
-modalClose.addEventListener('click',()=>modal.setAttribute('aria-hidden','true'));
-form.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  formStatus.textContent = 'Отправка...';
-  const data = Object.fromEntries(new FormData(form).entries());
+function formatDate(d){
   try{
-    const res = await fetch('/api/send-review',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
-    await res.json();
-    form.reset(); formStatus.textContent='';
-    document.getElementById('modalTitle').textContent='Спасибо!';
-    document.getElementById('modalText').textContent='Ваш отзыв отправлен на модерацию. Мы опубликуем его после проверки.';
-    modal.setAttribute('aria-hidden','false');
-  }catch(err){ formStatus.textContent='Не удалось отправить. Попробуйте позже.'; }
-});
+    const dd = new Date(d);
+    return dd.toLocaleDateString('ru-RU');
+  }catch{ return d; }
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
 
 // AML
 document.getElementById('amlContent').innerHTML = `
@@ -84,7 +90,7 @@ document.getElementById('amlContent').innerHTML = `
 4.1. При установлении проблемной транзакции Сервис имеет право: удерживать средства до завершения проверки; приостановить выполнение обмена; ограничить возможность последующих обменов; запросить документы об источниках происхождения средств; отправить криптовалюту назад в течение двух часов.</p>
 `;
 
-// Rules — полный текст
+// Правила — полный текст
 document.getElementById('rulesContent').innerHTML = `🧾 Правила обмена сервиса OnionChange<br/>
 Настоящие Правила регулируют порядок предоставления услуг по обмену цифровых активов (криптовалют) в сервисе OnionChange (далее — Сервис). Совершая обмен через бота или сайт OnionChange, Пользователь подтверждает, что ознакомился с настоящими условиями и безоговорочно принимает их.<br/><br/>
 <b>1. Общие положения</b><br/>
