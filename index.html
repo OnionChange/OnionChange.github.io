@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OnionChange — обменник криптовалют</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="assets/logo.png" />
+</head>
+<body>
+<header class="container">
+  <div class="brand">
+    <img src="assets/logo.png" alt="OnionChange" class="logo"/>
+    <div>
+      <h1>OnionChange</h1>
+      <p class="tag">быстрый и безопасный обмен криптовалют</p>
+    </div>
+  </div>
+  <nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Меню">☰</button>
+    <ul id="menu">
+      <li><a href="#reviews">Отзывы</a></li>
+      <li><a href="#add-review">Написать отзыв</a></li>
+      <li><a href="#aml">AML проверка</a></li>
+      <li><a href="#rules">Правила</a></li>
+      <li><a href="#contacts">Контакты</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="container">
+  <section id="hero" class="card hero">
+    <h2>Добро пожаловать в OnionChange</h2>
+    <p>Создайте заявку в Telegram и получите перевод без регистрации и KYC. Время зачисления от 10 до 300 минут.<br/>
+    Рабочее время: 10:00–23:00 (МСК).</p>
+    <div class="cta-row">
+      <a class="btn" target="_blank" rel="noopener" href="https://t.me/OnionExChangeBot">Создать заявку в боте</a>
+      <a class="btn ghost" target="_blank" rel="noopener" href="https://t.me/OnionChange">Канал с новостями</a>
+    </div>
+  </section>
+
+  <section id="reviews" class="card">
+    <div class="section-head">
+      <h2>Отзывы</h2>
+      <div id="reviewsInfo" class="muted"></div>
+    </div>
+    <div id="reviewsList" class="reviews"></div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <section id="add-review" class="card">
+    <h2>Написать отзыв</h2>
+    <form id="reviewForm">
+      <div class="grid-2">
+        <label>Номер заявки
+          <input name="request_id" required placeholder="Например, A1234"/>
+        </label>
+        <label>Сумма обмена (₽)
+          <input name="amount_rub" type="number" inputmode="numeric" min="1" required placeholder="Сумма в рублях"/>
+        </label>
+      </div>
+      <div class="grid-2">
+        <label>Имя
+          <input name="name" required placeholder="Как вас подписать?"/>
+        </label>
+        <label>Дата обмена
+          <input name="date" type="date" required />
+        </label>
+      </div>
+      <label>Отзыв
+        <textarea name="text" rows="5" required placeholder="Опишите ваш опыт обмена..."></textarea>
+      </label>
+      <div class="form-actions">
+        <button type="submit" class="btn">Оставить отзыв</button>
+        <span class="muted" id="formStatus"></span>
+      </div>
+    </form>
+  </section>
+
+  <section id="aml" class="card">
+    <h2>AML проверка</h2>
+    <div class="prose" id="amlContent"></div>
+  </section>
+
+  <section id="rules" class="card">
+    <h2>Правила</h2>
+    <div class="prose" id="rulesContent"></div>
+  </section>
+
+  <section id="contacts" class="card">
+    <h2>Контакты</h2>
+    <ul class="contacts">
+      <li>Канал в Telegram: <a target="_blank" rel="noopener" href="https://t.me/OnionChange">@OnionChange</a></li>
+      <li>Бот для заявок: <a target="_blank" rel="noopener" href="https://t.me/OnionExChangeBot">@OnionExChangeBot</a></li>
+      <li>Поддержка: <a target="_blank" rel="noopener" href="https://t.me/onionsupportEX">@onionsupportEX</a></li>
+      <li>Email: <a href="mailto:onionchange@internet.ru">onionchange@internet.ru</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="container">
+  <p class="muted">© <span id="year"></span> OnionChange. Все права защищены.</p>
+</footer>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-content">
+    <h3 id="modalTitle">Спасибо!</h3>
+    <p id="modalText">Ваш отзыв отправлен. Мы проверим его и опубликуем в ближайшее время.</p>
+    <button class="btn" id="modalClose">Понятно</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
